@@ -1,3 +1,6 @@
+setwd('/home/rstudio/PennGSE/')
+fname <- "MoneyThingy-August-Branch-2.csv"
+MT <- read.csv(fname, header = TRUE)
 
 library(relaimpo)
 
@@ -6,13 +9,3 @@ boot <- boot.relimp(fit, b = 1000, type = c("first"), rank = TRUE,  diff = TRUE,
 booteval.relimp(boot) # print result
 plot(booteval.relimp(boot,sort=TRUE)) # plot result
 
-
-# Pie Chart with Percentages
-slices <- colMeans(MT)[27:35] 
-lbls <- substring(names(slices),3)
-pct <- round(slices/sum(slices)*100)
-lbls <- paste(lbls, pct) # add percents to labels 
-lbls <- paste(lbls,"%",sep="") # ad % to labels 
-pie(slices,labels = lbls, col=rainbow(length(lbls)),
-    main="Sources of Expense When the Venture is Running a Loss")
-substring(x, 2)
