@@ -1,5 +1,5 @@
 ---
-title: "Money Thingy Model Analysis"
+title: "Money Commons Model Analysis"
 author: "Hilary Hunt & Brad Lindaas"
 date: "8/2/2015"
 output: word_document
@@ -12,11 +12,11 @@ fname <- "MoneyThingy-August-Branch-2.csv"
 MT <- read.csv(fname, header = TRUE)
 ```
 
-# Money Thingy (MT) Model Analysis
+# Money Commons (MC) Model Analysis
 
 ## Background
 
-This analysis will examine the key inputs and outputs of the MT model. The dataset contains `r nrow(MT)` simulations of the model. Each key input into the model (assumptions) was subjected to variability using a random distribution with an assumed standard deviation. There are 36 total assumptions in the model. We ran a sensitivity analysis to determine the top 15 assumptions that accounted for 80% of the variation of NPV, CLV and Break Even. 
+This analysis will examine the key inputs and outputs of the MC model. The dataset contains `r nrow(MT)` simulations of the model. Each key input into the model (assumptions) was subjected to variability using a random distribution with an assumed standard deviation. There are 36 total assumptions in the model. We ran a sensitivity analysis to determine the top 15 assumptions that accounted for 80% of the variation of NPV, CLV and Break Even. 
 
 ## Summary of Results
 
@@ -30,7 +30,7 @@ plot (
   type="n",
   xlim=c(min(MT$NPV/1000000),max(MT$NPV/1000000)),
   ylim=c(0,1.2),
-  main="Money Thingy Net Present Value", 
+  main="Money Commons Net Present Value", 
   xlab="NPV, in $M", 
   ylab="",
   yaxt="n"
@@ -73,7 +73,7 @@ plot (
   type="n",
   xlim=c(min(MT$Cash_Burn/1000000),max(MT$Cash_Burn/1000000)),
   ylim=c(0,6),
-  main="Money Thingy Cash Needs", 
+  main="Money Commons Cash Needs", 
   xlab="Cash Needs, in $M", 
   ylab="",
   yaxt="n"
@@ -123,7 +123,7 @@ plot (
   type="n",
   xlim=c(min(MT$EV/1000000),max(MT$EV/1000000)),
   ylim=c(0,.3),
-  main="Money Thingy Enterprise Value at Year 5", 
+  main="Money Commons Enterprise Value at Year 5", 
   xlab="EV, in $M", 
   ylab="",
   yaxt="n"
@@ -292,7 +292,7 @@ abline(v = mean(MT$Ret)*100, col = "blue", lwd = 5, lty=2)
 
 ### Controlling Costs
 
-The last major group of assumptions has to do with controlling fixed and variable costs in the model. These X assumptions that control expenses in the model had the most significant impact on overall value in the model.
+The last major group of assumptions has to do with controlling fixed and variable costs in the model. These 8 assumptions that control expenses in the model had the most significant impact on overall value in the model.
 
 * The payment made to a Forum moderator on an annual basis (`Mod_Cost`)
 * The unplanned, but anticipated Misc costs to the venture (`Misc`)
