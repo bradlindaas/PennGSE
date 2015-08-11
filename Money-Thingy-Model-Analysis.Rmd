@@ -2,7 +2,7 @@
 title: "Money Thingy Model Analysis"
 author: "Hilary Hunt & Brad Lindaas"
 date: "8/2/2015"
-output: pdf_document
+output: word_document
 ---
 
 ```{r, echo=FALSE}
@@ -22,7 +22,7 @@ This analysis will examine the key inputs and outputs of the MT model. The datas
 
 ### Net Present Value
 
-What is the likelihood the venture will generate an economic return to the investors? We need to determine if the venture will generate a positive net present value. In the simulations, the model generates a positive NPV `r abs(round((1- (length(which(MT$NPV > 0)) / length(which(MT$NPV < 0))))*100,1))`% of the time. The mean NPV of the simulation is $`r round(mean(MT$NPV)/1000000,2)`M
+What is the likelihood the venture will generate an economic return to the investors? We need to determine if the venture will generate a positive net present value. In the simulations, the model generates a positive NPV `r abs(round((1-(length(which(MT$NPV > 0)) / length(which(MT$NPV < 0))))*100,1))`% of the time. The mean NPV of the simulation is $`r round(mean(MT$NPV)/1000000,2)`M
 
 ```{r NPV-Plot, echo=FALSE}
 plot (
@@ -110,7 +110,7 @@ pct <- round(slices/sum(slices)*100)
 lbls <- paste(lbls, pct) # add percents to labels 
 lbls <- paste(lbls,"%",sep="") # ad % to labels 
 pie(slices,labels = lbls, col=rainbow(length(lbls)),
-    main="Sources of Expense When the Venture is Running a Loss")
+    main="Uses of Cash During Loss Years")
 ```
 
 ### Enterprise Value at Year 5
