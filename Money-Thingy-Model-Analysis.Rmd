@@ -1,0 +1,412 @@
+---
+title: "Money Thingy Model Analysis"
+author: "Hilary Hunt & Brad Lindaas"
+date: "8/2/2015"
+output: pdf_document
+---
+
+```{r, echo=FALSE}
+library(knitr)
+setwd('/home/rstudio/PennGSE/')
+fname <- "MoneyThingy-August-Branch-2.csv"
+MT <- read.csv(fname, header = TRUE)
+```
+
+# Money Thingy (MT) Model Analysis
+
+## Background
+
+This analysis will examine the key inputs and outputs of the MT model. The dataset contains `r nrow(MT)` simulations of the model. Each key input into the model (assumptions) was subjected to variability using a random distribution with an assumed standard deviation. There are 36 total assumptions in the model. We ran a sensitivity analysis to determine the top 15 assumptions that accounted for 80% of the variation of NPV, CLV and Break Even. 
+
+## Summary of Results
+
+### Net Present Value
+
+What is the likelihood the venture will generate an economic return to the investors? We need to determine if the venture will generate a positive net present value. In the simulations, the model generates a positive NPV `r abs(round((1- (length(which(MT$NPV > 0)) / length(which(MT$NPV < 0))))*100,1))`% of the time. The mean NPV of the simulation is $`r round(mean(MT$NPV)/1000000,2)`M
+
+```{r NPV-Plot, echo=FALSE}
+plot (
+  0,0,
+  type="n",
+  xlim=c(min(MT$NPV/1000000),max(MT$NPV/1000000)),
+  ylim=c(0,1.2),
+  main="Money Thingy Net Present Value", 
+  xlab="NPV, in $M", 
+  ylab="",
+  yaxt="n"
+)
+
+lines (
+  density (MT$NPV/1000000, adjust=2), 
+  col="blue", lwd=2
+)
+
+abline(v = 0, col = "red", lwd = 2, lty=1)
+
+```
+
+### Break Even Analysis
+
+How long will it take the venture to reach positive cash flow? The chart below shows the number of years it will take the venture to have a year with positive cash flow. Nine years means it will not reach positive cash flow within 5 years. Within the simulations, the average time number of years to break even is `r round(mean(MT$BE),2)`.
+
+```{r BE, echo=FALSE}
+
+brplt <- barplot (
+  table(MT$BE),
+  main="Number of Years to Positive Cash Flow",
+  ylab="Number of Simulations", 
+  col=c("blue"),
+)
+
+```
+
+\pagebreak
+
+### Cash Requirements
+
+How much cash will the venture need to spend in the red before it will reach positive cash flow? The plot below looks at the expected total cash burn of the firm. The mean of the cash burn of the venture is $`r round(mean(MT$Cash_Burn)/1000000,2)`M .
+
+```{r Cash_Burn, echo=FALSE}
+
+plot (
+  0,0,
+  type="n",
+  xlim=c(min(MT$Cash_Burn/1000000),max(MT$Cash_Burn/1000000)),
+  ylim=c(0,6),
+  main="Money Thingy Cash Needs", 
+  xlab="Cash Needs, in $M", 
+  ylab="",
+  yaxt="n"
+)
+
+lines (
+  density (MT$Cash_Burn/1000000, adjust=2), col="blue", lwd=2
+)
+
+abline(v = mean(MT$Cash_Burn)/1000000, col = "blue", lwd = 5, lty=4)
+
+summary(MT$Cash_Burn/1000000)
+
+```
+
+For years when the venture runs at a loss, what is the cash paying for? The following pie chart shows the distribution of expense, by category. 
+
+Name | Description
+--- | ---
+`Dev` | Development of website, Forum, course platform and initial course content
+`Course` | Development of additional courses during the plan
+`Mod` | Contractor fees paid to Moderators
+`Instr` | Contractor fees paid to online instructors
+`IT` | Fees for web hosting and bandwidth
+`Staff` | Salary and Benefits paid to support staff
+`Market` | Marketing and Advertising
+`BizDev` | Fees paid to business develop professional to secure advertisers
+`Other` | Other miscellaneous fees, including legal, payment processing, etc.
+
+```{r Cash-Pie, echo=FALSE}
+slices <- colMeans(MT)[27:35] 
+lbls <- substring(names(slices),3)
+pct <- round(slices/sum(slices)*100)
+lbls <- paste(lbls, pct) # add percents to labels 
+lbls <- paste(lbls,"%",sep="") # ad % to labels 
+pie(slices,labels = lbls, col=rainbow(length(lbls)),
+    main="Sources of Expense When the Venture is Running a Loss")
+```
+
+### Enterprise Value at Year 5
+
+What might the venture be worth at the end of 5 years if the founder decides to sell? The plot below looks at the expected enterprise value of the firm looking at a likely range of 11X EBITDA, or 3.2X REVENUE. The mean EV of the venture is $`r round(mean(MT$EV)/1000000,2)`M using the EBITDA method, and $`r round(mean(MT$EV_Rev)/1000000,2)`M using the EBITDA method.
+
+```{r EV-Plot, echo=FALSE}
+plot (
+  0,0,
+  type="n",
+  xlim=c(min(MT$EV/1000000),max(MT$EV/1000000)),
+  ylim=c(0,.3),
+  main="Money Thingy Enterprise Value at Year 5", 
+  xlab="EV, in $M", 
+  ylab="",
+  yaxt="n"
+)
+
+lines (
+  density (MT$EV/1000000, adjust=2), 
+  col="blue", lwd=2
+)
+
+lines (
+  density (MT$EV_Rev/1000000, adjust=2), 
+  col="green", lwd=2
+)
+
+abline(v = 0, col = "red", lwd = 2, lty=1)
+
+abline(v = mean(MT$EV)/1000000, col = "blue", lwd = 2, lty=2)
+
+abline(v = mean(MT$EV_Rev)/1000000, col = "green", lwd = 2, lty=2)
+
+legend (
+  min(MT$EV/1000000), 0.3, 
+  c("EBITDA Multiple", "Revenue Multiple"), 
+  col = c("blue", "green"),
+  lty = c(1,1),
+  lwd = 2
+)
+
+```
+
+## Assumption Details
+
+The following table summarizes the Top 15 variables that impacted the model. While there are over 30 assumptions in the model, these 15 assumptions account for 80% of the variation of the model, and so we focus on those in planning our venture. The assumptions are listed in order of their impact to NPV.
+
+Assumption Name | Assumption Description | Best Guess
+--- | --- | ---
+`Buy_Class_CAGR` | Annual Growth in % of users that will buy classes | `r round(mean(MT$Buy_Class_CAGR)*100,2)`%
+`Signup` | Initial % of available market that will signup for Forum | `r round(mean(MT$Signup),2)`%
+`Mod_Cost` | Payment made to a moderator on an annual basis | $`r round(mean(MT$Mod_Cost),2)`
+`Misc` | Misc. annual expenses | $`r round(mean(MT$Misc),2)`
+`Class_Per_Inst` | Number of online classes an instructor will deliver per year | `r round(mean(MT$Class_Per_Inst),2)`
+`Seat_Class` | Number of users we can support per each online class | `r round(mean(MT$Seat_Class),2)` 
+`Seat_Class_CAGR` | Annual growth of number of users per class | `r round(mean(MT$Seat_Class_CAGR)*100,2)`%
+`Buy_Class` | Initial % of users that will pay for classes | `r round(mean(MT$Buy_Class)*100,2)`%
+`Teach` | Number of financial lit. teachers per HS in states that have a requirement | `r round(mean(MT$Teach),2)`
+`Signup_CAGR` | Annual growth in % of available market that will signup for Forum | `r round(mean(MT$Signup_CAGR)*100,2)`%
+`Users_Per_Mod` | Number of concurrent users a moderator can support | `r round(mean(MT$Users_Per_Mod),2)`
+`Course_Cost` | Cost to develop an additional online course | $`r round(mean(MT$Course_Cost),2)`
+`Ret` | Initial retention rate of Forum users | `r round(mean(MT$Ret)*100,2)`%
+`Users_Per_Mod_CAGR` | Annual growth in number of users a moderator can support | `r round(mean(MT$Users_Per_Mod_CAGR)*100,2)`%
+
+### Getting Users to Buy Classes
+
+The most critical assumptions that drive value in the venture involve getting users that sign up for the Forum to buy classes. The three related assumptions are:
+
+* The initial (Year 1) percent of active Forum users that will buy classes (`Buy_Class`)
+* The annual growth in that rate of purchase (`Buy_Class_CAGR`)
+* The price of the class (`Class_Price`)
+
+The following charts provide the simulated range of those assumptions used while testing the model:
+
+```{r Buy_Class-Plot, echo=FALSE}
+hist (
+  MT$Buy_Class*100,
+  main="Range of Values for Buy_Class", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Buy_Class)*100, col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Buy_Class_CAGR-Plot, echo=FALSE}
+hist (
+  MT$Buy_Class_CAGR*100,
+  main="Range of Values for Buy_Class_CAGR", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Buy_Class_CAGR)*100, col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Class_Price-Plot, echo=FALSE}
+hist (
+  MT$Class_Price,
+  main="Range of Values for Class_Price", 
+  xlab="Dollars ($)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Class_Price), col = "blue", lwd = 5, lty=2)
+
+```
+
+### Getting Teachers to Sign Up for the Forum, and Stay Active
+
+The next critical activity and set of assumptions that impacts the value of the venture involves user acquisition and retention. How effective we are at capturing teachers as users in our solution, and retaining them drives the population that will be available to buy online classes. The key assumptions that drive this activity are:
+
+* The initial percent of targeted market that we can convince to signup (`Signup`)
+* The number of teachers per high school that teach financial literacy in states that have a requirement (`Teach`)
+* The rate at which we can grow our ability to get new users to signup (`Signup_CAGR`)
+* The retention rate of users that have already signed up for the Forum (`Ret`)
+
+The following charts provide the simulated range of those assumptions used while testing the model:
+
+```{r Signup-Plot, echo=FALSE}
+hist (
+  MT$Signup,
+  main="Range of Values for Signup", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Signup), col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Teach-Plot, echo=FALSE}
+hist (
+  MT$Teach,
+  main="Range of Values for Teach", 
+  xlab="Num of Teachers Per High School", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Teach), col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Signup_CAGR-Plot, echo=FALSE}
+hist (
+  MT$Signup_CAGR*100,
+  main="Range of Values for Signup_CAGR", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Signup_CAGR)*100, col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Ret-Plot, echo=FALSE}
+hist (
+  MT$Ret*100,
+  main="Range of Values for Ret", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Ret)*100, col = "blue", lwd = 5, lty=2)
+
+```
+
+\pagebreak
+
+### Controlling Costs
+
+The last major group of assumptions has to do with controlling fixed and variable costs in the model. These X assumptions that control expenses in the model had the most significant impact on overall value in the model.
+
+* The payment made to a Forum moderator on an annual basis (`Mod_Cost`)
+* The unplanned, but anticipated Misc costs to the venture (`Misc`)
+* The number of classes an instructor will deliver in a year (`Class_Per_Inst`)
+* The number of concurrent users that we will be able to fit in an online class (`Seat_Class`)
+* Our ability to increase the number of users per class over time (`Seat_Class_CAGR`)
+* The number of Forum users a moderator can effectively handle (`Users_Per_Mod`)
+* Our ability to increase the number of Forum users a moderator can handle over time (`Users_Per_Mod_CAGR`)
+* The expense associated with creating an additional online course, paid to a contractor (`Course_Cost`)
+
+The following charts provide the simulated range of those assumptions used while testing the model:
+
+```{r Mod_Cost-Plot, echo=FALSE}
+hist (
+  MT$Mod_Cost,
+  main="Range of Values for Mod_Cost", 
+  xlab="Dollars ($)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Mod_Cost), col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Misc-Plot, echo=FALSE}
+hist (
+  MT$Misc,
+  main="Range of Values for Misc", 
+  xlab="Dollars ($)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Misc), col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Class_Per_Inst-Plot, echo=FALSE}
+hist (
+  MT$Class_Per_Inst,
+  main="Range of Values for Class_Per_Inst", 
+  xlab="Num of Classes", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Class_Per_Inst), col = "blue", lwd = 5, lty=2)
+
+```
+
+
+```{r Seat_Class-Plot, echo=FALSE}
+hist (
+  MT$Seat_Class,
+  main="Range of Values for Seat_Class", 
+  xlab="Number of Users Per Class", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Seat_Class), col = "blue", lwd = 5, lty=2)
+
+```
+
+
+```{r Seat_Class_CAGR-Plot, echo=FALSE}
+hist (
+  MT$Seat_Class_CAGR*100,
+  main="Range of Values for Seat_Class_CAGR", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Seat_Class_CAGR)*100, col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Users_Per_Mod-Plot, echo=FALSE}
+hist (
+  MT$Users_Per_Mod,
+  main="Range of Values for Users_Per_Mod", 
+  xlab="Users Per Moderator", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Users_Per_Mod), col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Users_Per_Mod_CAGR-Plot, echo=FALSE}
+hist (
+  MT$Users_Per_Mod_CAGR*100,
+  main="Range of Values for Users_Per_Mod_CAGR", 
+  xlab="Percent (%)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Users_Per_Mod_CAGR)*100, col = "blue", lwd = 5, lty=2)
+
+```
+
+```{r Course_Cost, echo=FALSE}
+hist (
+  MT$Course_Cost,
+  main="Range of Values for Course Cost", 
+  xlab="Dollars ($)", 
+  ylab="",
+  yaxt="n"
+)
+
+abline(v = mean(MT$Course_Cost), col = "blue", lwd = 5, lty=2)
+
+```
