@@ -2,7 +2,7 @@
 title: "Money Commons Model Analysis"
 author: "Hilary Hunt & Brad Lindaas"
 date: "8/2/2015"
-output: word_document
+output: pdf_document
 ---
 
 ```{r, echo=FALSE}
@@ -159,7 +159,7 @@ legend (
 
 The following table summarizes the Top 15 variables that impacted the model. While there are over 30 assumptions in the model, these 15 assumptions account for 80% of the variation of the model, and so we focus on those in planning our venture. The assumptions are listed in order of their impact to NPV.
 
-Assumption Name | Assumption Description | Best Guess
+Assumption Name | Assumption Description | Mean Value
 --- | --- | ---
 `Buy_Class_CAGR` | Annual Growth in % of users that will buy classes | `r round(mean(MT$Buy_Class_CAGR)*100,2)`%
 `Signup` | Initial % of available market that will signup for Forum | `r round(mean(MT$Signup),2)`%
